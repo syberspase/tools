@@ -1,0 +1,229 @@
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃              FinBERT AI TRADING SYSTEM - COMMAND REFERENCE                  ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+🚀 QUICK START
+────────────────────────────────────────────────────────────────────────────────
+pip install -r requirements_finbert.txt    # Install dependencies
+./start_trading.sh                         # Start everything (one command!)
+./stop_trading.sh                          # Stop all services
+
+📖 DOCUMENTATION
+────────────────────────────────────────────────────────────────────────────────
+cat README_FINBERT.md                      # Complete documentation
+cat QUICKSTART_FINBERT.md                  # Quick reference
+cat FINBERT_COMPLETE_SUMMARY.txt           # This summary
+python3 architecture_diagram.py            # System architecture
+
+🧪 TESTING
+────────────────────────────────────────────────────────────────────────────────
+python3 test_finbert.py                    # Run all tests (6 tests)
+python3 -m pytest test_finbert.py -v       # Verbose test output
+
+🎮 MANUAL CONTROL
+────────────────────────────────────────────────────────────────────────────────
+# Start Flask backend
+python3 app_stock_sim.py
+
+# Start AI agent (separate terminal)
+python3 finbert_trading_agent.py
+
+# Test sentiment analysis
+python3 -c "from finbert_trading_agent import FinBERTSentimentAnalyzer; \
+            analyzer = FinBERTSentimentAnalyzer(); \
+            result = analyzer.analyze_text('Apple surges on record earnings'); \
+            print(f'Score: {result[\"score\"]}')"
+
+# Test signal generation
+python3 -c "from finbert_trading_agent import FinBERTTradingAgent; \
+            agent = FinBERTTradingAgent(); \
+            ohlcv = agent.get_ohlcv_from_backend('AAPL', '15m'); \
+            signal = agent.generate_trading_signal('AAPL', ohlcv); \
+            print(f'Action: {signal[\"action\"]}, Confidence: {signal[\"confidence\"]:.2%}')"
+
+📊 API TESTING (via curl)
+────────────────────────────────────────────────────────────────────────────────
+# Get OHLC data
+curl http://localhost:5000/api/ohlc/AAPL/15m | jq
+
+# Get portfolio
+curl http://localhost:5000/api/portfolio/auto_trader | jq
+
+# Execute trade
+curl -X POST http://localhost:5000/api/trade \
+  -H "Content-Type: application/json" \
+  -d '{"symbol":"AAPL","action":"buy","shares":10}' | jq
+
+# Start AI trading
+curl -X POST http://localhost:5000/api/ai/start | jq
+
+# Stop AI trading
+curl -X POST http://localhost:5000/api/ai/stop | jq
+
+# Get AI signals
+curl http://localhost:5000/api/ai/signals | jq
+
+# Get AI trades
+curl http://localhost:5000/api/ai/trades | jq
+
+📝 LOGS
+────────────────────────────────────────────────────────────────────────────────
+tail -f flask.log                          # Flask backend logs
+tail -f finbert.log                        # AI agent logs
+tail -f flask.log finbert.log              # Both logs
+
+grep ERROR flask.log                       # Find errors in Flask
+grep ERROR finbert.log                     # Find errors in AI agent
+
+🔍 MONITORING
+────────────────────────────────────────────────────────────────────────────────
+# Check if services are running
+ps aux | grep python3 | grep app_stock_sim
+ps aux | grep python3 | grep finbert_trading
+
+# Check port usage
+lsof -i :5000                              # Flask backend port
+
+# Check PIDs
+cat .flask.pid                             # Flask process ID
+cat .finbert.pid                           # AI agent process ID
+
+# Kill processes
+kill $(cat .flask.pid)                     # Kill Flask
+kill $(cat .finbert.pid)                   # Kill AI agent
+pkill -f app_stock_sim.py                  # Kill Flask (alternative)
+pkill -f finbert_trading_agent.py          # Kill AI (alternative)
+
+🛠️ DEVELOPMENT
+────────────────────────────────────────────────────────────────────────────────
+# Edit configuration
+nano finbert_trading_agent.py             # Edit AI parameters
+nano app_stock_sim.py                      # Edit Flask app
+
+# Reload Flask (dev mode)
+# Just save file, Flask auto-reloads in debug mode
+
+# Restart AI agent
+./stop_trading.sh && ./start_trading.sh
+
+# View integration examples
+cat integration_examples.py
+python3 integration_examples.py
+
+💾 DATA MANAGEMENT
+────────────────────────────────────────────────────────────────────────────────
+# Check model size
+du -h ~/.cache/huggingface/hub/models--ProsusAI--finbert
+
+# Clear model cache (re-download on next run)
+rm -rf ~/.cache/huggingface/hub/models--ProsusAI--finbert
+
+# Export trade history
+python3 -c "from finbert_trading_agent import FinBERTTradingAgent; \
+            import json; \
+            agent = FinBERTTradingAgent(); \
+            with open('trades.json', 'w') as f: \
+                json.dump(list(agent.trade_history), f, indent=2)"
+
+# Export signal history
+python3 -c "from finbert_trading_agent import FinBERTTradingAgent; \
+            import json; \
+            agent = FinBERTTradingAgent(); \
+            with open('signals.json', 'w') as f: \
+                json.dump(list(agent.signal_history), f, indent=2)"
+
+🔧 TROUBLESHOOTING
+────────────────────────────────────────────────────────────────────────────────
+# Check Python version
+python3 --version                          # Should be 3.8+
+
+# Check dependencies
+pip list | grep torch
+pip list | grep transformers
+pip list | grep flask
+
+# Verify GPU availability
+python3 -c "import torch; print(f'GPU: {torch.cuda.is_available()}')"
+nvidia-smi                                 # NVIDIA GPU info (if available)
+
+# Test imports
+python3 -c "import torch, transformers, numpy, flask; print('✅ All OK')"
+
+# Check disk space
+df -h ~/.cache/huggingface                 # Model cache directory
+
+# Check RAM usage
+free -h
+htop                                       # Interactive process viewer
+
+# Re-install dependencies
+pip install --upgrade --force-reinstall torch transformers numpy flask
+
+# Reset everything
+./stop_trading.sh
+rm -f flask.log finbert.log .flask.pid .finbert.pid
+./start_trading.sh
+
+📈 PERFORMANCE TUNING
+────────────────────────────────────────────────────────────────────────────────
+# CPU optimization
+export OMP_NUM_THREADS=4                   # Limit CPU threads
+export MKL_NUM_THREADS=4
+
+# GPU optimization (if available)
+export CUDA_VISIBLE_DEVICES=0              # Use GPU 0
+
+# Reduce model precision (faster, less accurate)
+python3 -c "import torch; model.half()"    # FP16 instead of FP32
+
+# Profile performance
+python3 -m cProfile finbert_trading_agent.py > profile.txt
+
+🎯 QUICK COMMANDS
+────────────────────────────────────────────────────────────────────────────────
+# One-liner: Install + Start
+pip install -r requirements_finbert.txt && ./start_trading.sh
+
+# One-liner: Stop + Clean + Start
+./stop_trading.sh && rm -f *.log .*.pid && ./start_trading.sh
+
+# One-liner: Check status
+curl -s http://localhost:5000/api/ai/signals | jq '.stats'
+
+# One-liner: Get latest trade
+curl -s http://localhost:5000/api/ai/trades | jq '.trades[0]'
+
+# One-liner: Test sentiment
+python3 -c "from finbert_trading_agent import FinBERTSentimentAnalyzer; \
+            print(FinBERTSentimentAnalyzer().analyze_text('Bullish market'))"
+
+📱 BROWSER ACCESS
+────────────────────────────────────────────────────────────────────────────────
+http://localhost:5000                      # Main app
+http://localhost:5000/api/symbols          # Price data
+http://localhost:5000/api/ai/signals       # AI signals (JSON)
+http://localhost:5000/api/ai/trades        # Trade history (JSON)
+
+🔗 USEFUL LINKS
+────────────────────────────────────────────────────────────────────────────────
+FinBERT Model:     https://huggingface.co/ProsusAI/finbert
+FinBERT Paper:     https://arxiv.org/abs/1908.10063
+PyTorch:           https://pytorch.org
+Transformers:      https://huggingface.co/docs/transformers
+Flask:             https://flask.palletsprojects.com
+
+📞 SUPPORT
+────────────────────────────────────────────────────────────────────────────────
+For issues:
+  1. Check logs: tail -f flask.log finbert.log
+  2. Run tests: python3 test_finbert.py
+  3. Review documentation: cat README_FINBERT.md
+
+For questions about:
+  • Installation: README_FINBERT.md (Installation section)
+  • Configuration: QUICKSTART_FINBERT.md (Configuration section)
+  • Integration: integration_examples.py
+  • Troubleshooting: README_FINBERT.md (Troubleshooting section)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Version 1.0.0 | Generated: 2025-11-17 | Author: GitHub Copilot | License: MIT

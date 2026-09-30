@@ -1,0 +1,22 @@
+# FinBERT AI Trading Agent - Python Dependencies
+
+# Core ML/NLP
+torch>=2.0.0
+transformers>=4.35.0
+numpy>=1.24.0
+
+# Web Framework
+flask>=3.0.0
+
+# Utilities
+requests>=2.31.0
+
+# Optional: Performance optimization
+accelerate>=0.24.0
+
+# Optional: GPU support (uncomment if you have NVIDIA GPU)
+# Install with: pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+
+# Development/Testing
+# pytest>=7.4.0
+# pylint>=3.0.0
